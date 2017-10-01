@@ -1,0 +1,85 @@
+version: '2'
+
+services:
+
+  # サブドメインを使うためのプロキシサーバー nginx-proxy
+  proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # コンテナイベントの取得のためにdocker.sockをro[Read Only]でマウント
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - ./volumes/server/:/etc/nginx/certs:ro
+      - /etc/nginx/vhost.d
+      - /usr/share/nginx/html
+
+    restart: always
+
+
+  redis:
+    image: redis
+
+  # データのやり取りを抽象化するためのAPIサーバー
+  flask_api:
+      build: ./docker/flask
+      volumes:
+       - ./src/flask/:/code
+      links:
+       - redis
+       - "db:db"
+      expose:
+       - "80"
+      environment:
+        VIRTUAL_HOST: flask.api.*
+        VIRTUAL_PORT: 8
+      restart: always
+
+  #DB用ボリュームコンテナ
+  api_data:
+      image: busybox
+      volumes:
+        - /var/lib/mysql
+  db:
+    build: ./docker/mysql
+    volumes_from:
+        - api_data
+    ports:
+        - "3306:3306"
+    environment:
+        MYSQL_DATABASE: "ymic"
+        MYSQL_RANDOM_ROOT_PASSWORD: "yes"
+        MYSQL_USER: ymic
+        MYSQL_PASSWORD: ymic
+        TZ: "Asia/Tokyo"
+    volumes:
+      - ./volumes/mysql:/var/log/mysql
+      - ./docker/mysql/:/var/tmp/
+
+  php:
+    build: ./docker/php
+    links:
+      - "db:db"
+    volumes:
+      - ./src/php:/var/www/html
+    environment:
+      TZ: Japan
+      VIRTUAL_HOST: app.*
+
+  phpmyadmin:
+      image: phpmyadmin/phpmyadmin
+      environment:
+        - PMA_ARBITRARY=1
+        - PMA_HOST=mysql
+        - PMA_USER=ymic
+        - PMA_PASSWORD=ymic
+      links:
+        - db
+      # ports:
+      #   - "80:80"
+      volumes:
+        - /sessions
+      environment:
+        TZ: Japan
+        VIRTUAL_HOST: db.*
