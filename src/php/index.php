@@ -60,7 +60,7 @@ width: 512px;
 .demo-card-wide > .mdl-card__title {
 color: #fff;
 height: 176px;
-background: url('https://i.ytimg.com/vi/UK1HxOPBAw8/maxresdefault.jpg') center / cover;
+background: url('') center / cover;
 }
 .demo-card-wide > .mdl-card__menu {
 color: #fff;
