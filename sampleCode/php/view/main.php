@@ -80,14 +80,45 @@ $(function(){
 
 
 function getMsg(){
-// 課題2 messageを取得してみよう
+  // Ajaxを始める
+  $.ajax({
+    // データをくれるサーバーに問い合わせる
+    url: "./msg.php?pid=json",
+  }).done(function(data){ //ajaxの通信に成功した場合
+    console.log(data)
+    // いっぱいあるデータからデータを一つずつ取り出す
+    data.forEach(function(val, int, array){
+      // 表示してないものだけ表示処理する
+      if(parseInt(currentMsgId) < parseInt(val.id)){
+        currentMsgId = val.id;
+        // データを表示する
+         $("#timeLine").prepend(makeCard(val)).hide().fadeIn(1000);
+       }else{
 
-
+       }
+    });
+  }).fail(function(data){ //ajaxの通信に失敗した場合
+  });
 }
 
+// メッセージを投稿する関数 msgには投稿テキストが代入されます
 function postMsg(msg){
-// 課題1 messageを投稿してみよう
+  // スナックバーの準備
+  var snackbarContainer = document.querySelector('#demo-toast-example');
+  var showToastButton = document.querySelector('#demo-show-toast');
+  // Ajuaxを始める
+  $.ajax({
+    // 投稿処理をしてくれるサーバーに情報を送信する
+    url: "./msg.php?pid=post&msg="+ msg,
+  }).done(function(data){ //ajaxの通信に成功した場合
 
+      var data = {message: '投稿しました '};
+      snackbarContainer.MaterialSnackbar.showSnackbar(data);
+
+  }).fail(function(data){ //ajaxの通信に失敗した場合
+    var data = {message: '投稿に失敗しました '};
+    snackbarContainer.MaterialSnackbar.showSnackbar(data);
+  });
 
 }
 

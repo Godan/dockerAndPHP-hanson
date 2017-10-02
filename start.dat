@@ -1,0 +1,4 @@
+git clone https://github.com/Godan/dockerAndPHP-hanson.git
+cd dockerAndPHP-hanson
+docker-compose up -d
+start http://localhost

@@ -2,39 +2,24 @@ version: '2'
 
 services:
 
-  # サブドメインを使うためのプロキシサーバー nginx-proxy
-  proxy:
-    image: jwilder/nginx-proxy
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      # コンテナイベントの取得のためにdocker.sockをro[Read Only]でマウント
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-      - ./volumes/server/:/etc/nginx/certs:ro
-      - /etc/nginx/vhost.d
-      - /usr/share/nginx/html
-
-    restart: always
-
-
-  redis:
-    image: redis
-
-  # データのやり取りを抽象化するためのAPIサーバー
-  flask_api:
-      build: ./docker/flask
-      volumes:
-       - ./src/flask/:/code
-      links:
-       - redis
-       - "db:db"
-      expose:
-       - "80"
-      environment:
-        VIRTUAL_HOST: flask.api.*
-        VIRTUAL_PORT: 8
-      restart: always
+  # # サブドメインを使うためのプロキシサーバー nginx-proxy
+  # proxy:
+  #   image: jwilder/nginx-proxy
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     # コンテナイベントの取得のためにdocker.sockをro[Read Only]でマウント
+  #     - /var/run/docker.sock:/tmp/docker.sock:ro
+  #     - ./volumes/server/:/etc/nginx/certs:ro
+  #     - /etc/nginx/vhost.d
+  #     - /usr/share/nginx/html
+  #
+  #   restart: always
+  #
+  #
+  # redis:
+  #   image: redis
 
   #DB用ボリュームコンテナ
   api_data:
@@ -63,9 +48,10 @@ services:
       - "db:db"
     volumes:
       - ./src/php:/var/www/html
+    ports:
+      - "80:80"
     environment:
       TZ: Japan
-      VIRTUAL_HOST: app.*
 
   phpmyadmin:
       image: phpmyadmin/phpmyadmin
@@ -76,8 +62,8 @@ services:
         - PMA_PASSWORD=ymic
       links:
         - db
-      # ports:
-      #   - "80:80"
+      ports:
+        - "8080:80"
       volumes:
         - /sessions
       environment:
