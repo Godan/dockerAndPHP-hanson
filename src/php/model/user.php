@@ -18,9 +18,10 @@ class user
     }
   }
 
+
+  // 課題0 ユーザー登録をしよう
   public function registration(){
-    $stmt = $this->db->prepare("INSERT INTO `user` (`userName`, `passwd`) VALUES (?, ?);");
-    return $stmt->execute(array($this->userName, password_hash($this->passwd, PASSWORD_DEFAULT)));
+
   }
 
   public function passwdCheck(){
